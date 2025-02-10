@@ -1,0 +1,288 @@
+/* ==========================================================================
+   layout.css — Dashboard Grid Structure
+   Productivity Dashboard · Day 1
+   ========================================================================== */
+
+@import url('./tokens.css');
+
+/* -------------------------------------------------------------------------
+   Google Fonts import
+   --------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&display=swap');
+
+/* -------------------------------------------------------------------------
+   Reset & Base
+   --------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-base);
+    min-height: 100vh;
+    transition:
+        background-color var(--transition-slow),
+        color var(--transition-slow);
+
+    /* Subtle grain texture overlay */
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* -------------------------------------------------------------------------
+   App Shell — Full-height flex column
+   --------------------------------------------------------------------- */
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* -------------------------------------------------------------------------
+   Header Bar
+   Full-width, fixed height, sits above the grid
+   --------------------------------------------------------------------- */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-overlay);
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-6);
+    background-color: var(--color-bg-surface);
+    border-bottom: 1px solid var(--color-border-subtle);
+    box-shadow: var(--shadow-xs);
+    transition:
+        background-color var(--transition-slow),
+        border-color var(--transition-slow);
+
+    /* Fine horizontal rule accent */
+    background-image: linear-gradient(to right,
+            var(--color-accent) 0%,
+            var(--color-accent) 3px,
+            transparent 3px);
+    background-size: 3px 100%;
+    background-repeat: no-repeat;
+    background-position: left center;
+    padding-left: calc(var(--space-6) + 3px + var(--space-3));
+}
+
+.app-header__brand {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+}
+
+.app-header__title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+
+.app-header__subtitle {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    display: none;
+    /* hidden on smallest screens */
+}
+
+.app-header__controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* -------------------------------------------------------------------------
+   Main Content Area
+   --------------------------------------------------------------------- */
+.app-main {
+    flex: 1;
+    width: 100%;
+    max-width: var(--max-content);
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-6) var(--space-8);
+}
+
+/* -------------------------------------------------------------------------
+   Dashboard Grid
+   3-column layout with named areas:
+
+   ┌─────────────────────────────────┐
+   │   tasks (2 cols) │ timer (1 col)│
+   ├──────────────────┼──────────────┤
+   │   notes (2 cols) │ stats (1 col)│
+   └─────────────────────────────────┘
+   --------------------------------------------------------------------- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr minmax(260px, 340px);
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "tasks  tasks  timer"
+        "notes  notes  stats";
+    gap: var(--space-5);
+    align-items: start;
+}
+
+/* -------------------------------------------------------------------------
+   Grid Item Placement
+   --------------------------------------------------------------------- */
+.widget--tasks {
+    grid-area: tasks;
+}
+
+.widget--timer {
+    grid-area: timer;
+}
+
+.widget--notes {
+    grid-area: notes;
+}
+
+.widget--stats {
+    grid-area: stats;
+}
+
+/* -------------------------------------------------------------------------
+   Widget Card — shared shell
+   --------------------------------------------------------------------- */
+.widget {
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition:
+        background-color var(--transition-slow),
+        border-color var(--transition-slow),
+        box-shadow var(--transition-normal);
+}
+
+.widget:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.widget__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border-subtle);
+    background-color: var(--color-bg-sunken);
+    transition:
+        background-color var(--transition-slow),
+        border-color var(--transition-slow);
+}
+
+.widget__title {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.widget__body {
+    padding: var(--space-5);
+}
+
+/* -------------------------------------------------------------------------
+   Stats Bar — spans full width below the grid
+   --------------------------------------------------------------------- */
+.stats-bar-wrapper {
+    margin-top: var(--space-5);
+}
+
+/* -------------------------------------------------------------------------
+   Responsive — Tablet (< 1024px)
+   Collapse to 2 columns: tasks | timer stacked
+   --------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "tasks  timer"
+            "notes  stats";
+    }
+}
+
+/* -------------------------------------------------------------------------
+   Responsive — Mobile (< 768px)
+   Single column, natural stacking order
+   --------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .app-header {
+        padding: 0 var(--space-4);
+        padding-left: calc(var(--space-4) + 3px + var(--space-3));
+    }
+
+    .app-main {
+        padding: var(--space-4) var(--space-4) var(--space-6);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "tasks"
+            "timer"
+            "notes"
+            "stats";
+        gap: var(--space-4);
+    }
+
+    .app-header__subtitle {
+        display: none;
+    }
+}
+
+/* -------------------------------------------------------------------------
+   Responsive — Large screens (> 1280px)
+   Let it breathe with more padding
+   --------------------------------------------------------------------- */
+@media (min-width: 1280px) {
+    .app-main {
+        padding: var(--space-8) var(--space-10) var(--space-10);
+    }
+
+    .app-header__subtitle {
+        display: block;
+    }
+}
+
+/* -------------------------------------------------------------------------
+   Utility: Visually Hidden (accessibility)
+   --------------------------------------------------------------------- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}

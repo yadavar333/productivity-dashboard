@@ -1,0 +1,242 @@
+/* ==========================================================================
+   tokens.css — Design System Custom Properties
+   Productivity Dashboard · Day 1
+   ========================================================================== */
+
+:root {
+    /* -------------------------------------------------------------------------
+     Color Palette — Light Mode
+     Warm slate base with amber accent, editorial feel
+     --------------------------------------------------------------------- */
+
+    /* Surfaces */
+    --color-bg-base: #f5f3ef;
+    /* warm off-white parchment */
+    --color-bg-surface: #faf9f6;
+    /* card face */
+    --color-bg-elevated: #ffffff;
+    /* popover / input */
+    --color-bg-sunken: #eceae4;
+    /* inset / code bg */
+
+    /* Borders */
+    --color-border-subtle: #e0ddd5;
+    --color-border-default: #cbc8be;
+    --color-border-strong: #a09d94;
+
+    /* Text */
+    --color-text-primary: #1c1b18;
+    --color-text-secondary: #5a5850;
+    --color-text-tertiary: #9b9891;
+    --color-text-inverted: #f5f3ef;
+
+    /* Accent — Amber */
+    --color-accent-subtle: #fef3c7;
+    --color-accent-muted: #fcd34d;
+    --color-accent: #f59e0b;
+    --color-accent-strong: #d97706;
+    --color-accent-text: #92400e;
+
+    /* Priority colours */
+    --color-priority-high: #ef4444;
+    --color-priority-high-bg: #fee2e2;
+    --color-priority-high-border: #fca5a5;
+
+    --color-priority-medium: #f59e0b;
+    --color-priority-medium-bg: #fef3c7;
+    --color-priority-medium-border: #fcd34d;
+
+    --color-priority-low: #22c55e;
+    --color-priority-low-bg: #dcfce7;
+    --color-priority-low-border: #86efac;
+
+    /* Semantic */
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-error: #dc2626;
+    --color-info: #0284c7;
+
+    /* Pomodoro states */
+    --color-timer-work: #ef4444;
+    --color-timer-break: #22c55e;
+    --color-timer-ring: #e0ddd5;
+
+    /* -------------------------------------------------------------------------
+     Color Palette — Dark Mode
+     Applied via [data-theme="dark"] on <html>
+     --------------------------------------------------------------------- */
+
+    /* These are overridden in the dark block below — declared here for clarity */
+}
+
+[data-theme="dark"] {
+    /* Surfaces */
+    --color-bg-base: #151412;
+    --color-bg-surface: #1d1b18;
+    --color-bg-elevated: #252320;
+    --color-bg-sunken: #0e0d0b;
+
+    /* Borders */
+    --color-border-subtle: #2a2825;
+    --color-border-default: #3a3733;
+    --color-border-strong: #524f4a;
+
+    /* Text */
+    --color-text-primary: #f0ede8;
+    --color-text-secondary: #a09d94;
+    --color-text-tertiary: #68655e;
+    --color-text-inverted: #1c1b18;
+
+    /* Accent stays amber, adjusted for dark */
+    --color-accent-subtle: #2d2108;
+    --color-accent-muted: #92400e;
+    --color-accent: #f59e0b;
+    --color-accent-strong: #fbbf24;
+    --color-accent-text: #fcd34d;
+
+    /* Priority colours — slightly muted for dark */
+    --color-priority-high: #f87171;
+    --color-priority-high-bg: #2d1515;
+    --color-priority-high-border: #7f1d1d;
+
+    --color-priority-medium: #fbbf24;
+    --color-priority-medium-bg: #2d1f08;
+    --color-priority-medium-border: #78350f;
+
+    --color-priority-low: #4ade80;
+    --color-priority-low-bg: #0d2d1a;
+    --color-priority-low-border: #14532d;
+
+    /* Semantic */
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-error: #f87171;
+    --color-info: #38bdf8;
+
+    /* Pomodoro states */
+    --color-timer-work: #f87171;
+    --color-timer-break: #4ade80;
+    --color-timer-ring: #2a2825;
+}
+
+/* -------------------------------------------------------------------------
+   Typography Scale
+   Base: 16px  |  Display: Syne  |  Mono: DM Mono  |  Body: Literata
+   --------------------------------------------------------------------- */
+:root {
+    --font-display: 'Syne', 'DIN Alternate', 'Arial Black', sans-serif;
+    --font-body: 'Literata', 'Georgia', 'Times New Roman', serif;
+    --font-mono: 'DM Mono', 'Fira Code', 'Courier New', monospace;
+    --font-ui: 'Syne', system-ui, sans-serif;
+
+    --text-xs: 0.6875rem;
+    /* 11px */
+    --text-sm: 0.8125rem;
+    /* 13px */
+    --text-base: 0.9375rem;
+    /* 15px */
+    --text-md: 1.0625rem;
+    /* 17px */
+    --text-lg: 1.25rem;
+    /* 20px */
+    --text-xl: 1.5rem;
+    /* 24px */
+    --text-2xl: 2rem;
+    /* 32px */
+    --text-3xl: 2.75rem;
+    /* 44px — timer display */
+
+    --leading-tight: 1.2;
+    --leading-snug: 1.35;
+    --leading-normal: 1.55;
+    --leading-loose: 1.75;
+
+    --tracking-tight: -0.03em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.06em;
+    --tracking-wider: 0.12em;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* -------------------------------------------------------------------------
+     Spacing Scale — 4px base unit
+     --------------------------------------------------------------------- */
+    --space-px: 1px;
+    --space-0-5: 0.125rem;
+    /* 2px  */
+    --space-1: 0.25rem;
+    /* 4px  */
+    --space-1-5: 0.375rem;
+    /* 6px  */
+    --space-2: 0.5rem;
+    /* 8px  */
+    --space-2-5: 0.625rem;
+    /* 10px */
+    --space-3: 0.75rem;
+    /* 12px */
+    --space-4: 1rem;
+    /* 16px */
+    --space-5: 1.25rem;
+    /* 20px */
+    --space-6: 1.5rem;
+    /* 24px */
+    --space-7: 1.75rem;
+    /* 28px */
+    --space-8: 2rem;
+    /* 32px */
+    --space-10: 2.5rem;
+    /* 40px */
+    --space-12: 3rem;
+    /* 48px */
+    --space-16: 4rem;
+    /* 64px */
+
+    /* -------------------------------------------------------------------------
+     Border Radius
+     --------------------------------------------------------------------- */
+    --radius-none: 0;
+    --radius-sm: 3px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* -------------------------------------------------------------------------
+     Shadows
+     --------------------------------------------------------------------- */
+    --shadow-none: none;
+    --shadow-xs: 0 1px 2px 0 rgba(28, 27, 24, 0.06);
+    --shadow-sm: 0 1px 3px 0 rgba(28, 27, 24, 0.09),
+        0 1px 2px -1px rgba(28, 27, 24, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(28, 27, 24, 0.08),
+        0 2px 4px -2px rgba(28, 27, 24, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(28, 27, 24, 0.10),
+        0 4px 6px -4px rgba(28, 27, 24, 0.07);
+    --shadow-inner: inset 0 2px 4px 0 rgba(28, 27, 24, 0.07);
+
+    /* -------------------------------------------------------------------------
+     Transitions
+     --------------------------------------------------------------------- */
+    --transition-fast: 100ms ease;
+    --transition-normal: 200ms ease;
+    --transition-slow: 350ms ease;
+
+    /* -------------------------------------------------------------------------
+     Z-index Scale
+     --------------------------------------------------------------------- */
+    --z-base: 0;
+    --z-raised: 10;
+    --z-overlay: 100;
+    --z-modal: 200;
+    --z-toast: 300;
+
+    /* -------------------------------------------------------------------------
+     Layout constants
+     --------------------------------------------------------------------- */
+    --header-height: 60px;
+    --sidebar-width: 280px;
+    --max-content: 1280px;
+}
