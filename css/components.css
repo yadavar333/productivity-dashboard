@@ -631,8 +631,15 @@
 .notes-footer {
     margin-top: var(--space-2);
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
+}
+
+.notes-word-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    letter-spacing: var(--tracking-wide);
 }
 
 .notes-saved-indicator {

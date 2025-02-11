@@ -6,6 +6,9 @@
  *  1. Apply persisted theme (dark/light) before first paint (avoids flash)
  *  2. On DOMContentLoaded, initialise all feature modules in dependency order
  *  3. Wire the theme toggle button
+ *  4. Register keyboard shortcuts:
+ *       N — focus the task input (when not in a text field)
+ *       P — toggle Pomodoro start / pause
  *
  * Theme storage key : 'pdb_theme'   Values: 'dark' | 'light'
  *
@@ -110,7 +113,56 @@ function _updateThemeToggleUI(theme) {
 }
 
 // =============================================================================
-// 3. Module bootstrap
+// 3. Keyboard shortcuts
+// =============================================================================
+
+/**
+ * Returns true if the currently focused element is a text-entry field.
+ * Used to suppress shortcuts when the user is typing.
+ *
+ * @returns {boolean}
+ */
+function _focusedOnInput() {
+  const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+  return tag === 'input' || tag === 'textarea' || tag === 'select';
+}
+
+/**
+ * Registers global keyboard shortcut listeners.
+ *  N — focus the task input field (skipped when already in a text field)
+ *  P — toggle Pomodoro timer start / pause
+ *
+ * @returns {void}
+ */
+function _initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    // Ignore if modifier keys are held (Ctrl+N, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    switch (e.key.toUpperCase()) {
+      case 'N': {
+        if (_focusedOnInput()) return;
+        const taskInput = document.getElementById('task-input');
+        if (taskInput) {
+          e.preventDefault();
+          taskInput.focus();
+        }
+        break;
+      }
+      case 'P': {
+        if (_focusedOnInput()) return;
+        if (typeof PomodoroTimer !== 'undefined') {
+          e.preventDefault();
+          PomodoroTimer.startPause();
+        }
+        break;
+      }
+    }
+  });
+}
+
+// =============================================================================
+// 4. Module bootstrap
 // =============================================================================
 
 /**
@@ -166,11 +218,25 @@ function initApp() {
     console.error('[App] Stats module not loaded.');
   }
 
+  // --- Keyboard shortcuts ---
+  _initKeyboardShortcuts();
+
+  // --- Cross-module event wiring ---
+  // tasks.js dispatches 'taskchange' on every add/delete/toggle;
+  // also listen for 'taskToggled' for stats updates.
+  document.addEventListener('taskchange', () => {
+    if (typeof Stats !== 'undefined') Stats.update();
+  });
+
+  document.addEventListener('taskToggled', () => {
+    if (typeof Stats !== 'undefined') Stats.update();
+  });
+
   console.info('[App] All modules initialised. Dashboard ready.');
 }
 
 // =============================================================================
-// 4. Entry point
+// 5. Entry point
 // =============================================================================
 
 document.addEventListener('DOMContentLoaded', initApp);

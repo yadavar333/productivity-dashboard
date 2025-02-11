@@ -1,10 +1,11 @@
 /**
  * @fileoverview Quotes Module
  * Fetches a random inspirational quote from the Quotable API on page load.
- * Renders into #quote-container. Gracefully handles network failures with
- * a curated local fallback pool.
+ * Caches the result to localStorage with today's date — only fetches once per day.
+ * Falls back to a hardcoded quote on any network or API failure.
  *
- * API endpoint: https://api.quotable.io/random
+ * API endpoint  : https://api.quotable.io/random
+ * Cache key     : 'pdb_quote_cache'
  *
  * @module quotes
  */
@@ -13,68 +14,32 @@
 
 const Quotes = (() => {
   // -------------------------------------------------------------------------
-  // Fallback quotes (used when the API is unreachable)
+  // Constants
   // -------------------------------------------------------------------------
 
+  const CACHE_KEY = 'pdb_quote_cache';
+
   /**
-   * @typedef {Object} Quote
-   * @property {string} content - The quote text
-   * @property {string} author  - The author's name
+   * Hardcoded fallback quote shown when API is unreachable.
+   * @type {{content: string, author: string}}
    */
-
-  /** @type {Array<Quote>} */
-  const FALLBACK_QUOTES = [
-    { content: 'The secret of getting ahead is getting started.',             author: 'Mark Twain' },
-    { content: 'It is not enough to be busy, so too are the ants.',           author: 'Henry David Thoreau' },
-    { content: 'Focus on being productive instead of busy.',                  author: 'Tim Ferriss' },
-    { content: 'Simplicity is the ultimate sophistication.',                  author: 'Leonardo da Vinci' },
-    { content: 'Work is the refuge of people who have nothing better to do.', author: 'Oscar Wilde' },
-    { content: 'Done is better than perfect.',                                author: 'Sheryl Sandberg' },
-    { content: 'Amateurs sit and wait for inspiration; the rest of us just get up and go to work.', author: 'Stephen King' },
-    { content: 'The way to get started is to quit talking and begin doing.',  author: 'Walt Disney' },
-    { content: 'You don\'t have to be great to start, but you have to start to be great.', author: 'Zig Ziglar' },
-    { content: 'Productivity is never an accident. It is the result of a commitment to excellence.', author: 'Paul J. Meyer' },
-  ];
+  const FALLBACK_QUOTE = {
+    content: 'The secret of getting ahead is getting started.',
+    author:  'Mark Twain',
+  };
 
   // -------------------------------------------------------------------------
-  // DOM helpers
+  // Helpers
   // -------------------------------------------------------------------------
 
   /**
-   * Renders a quote into the #quote-container element.
+   * Returns today's date as YYYY-MM-DD in local time.
    *
-   * @param {Quote} quote - The quote to display
-   * @returns {void}
+   * @returns {string}
    */
-  function _render(quote) {
-    const container = document.getElementById('quote-container');
-    if (!container) return;
-
-    container.innerHTML = `
-      <blockquote class="quote-block">
-        <p class="quote-block__text">${_escapeHtml(quote.content)}</p>
-        <footer class="quote-block__author">— ${_escapeHtml(quote.author)}</footer>
-      </blockquote>
-    `;
-  }
-
-  /**
-   * Renders an error/loading message into the quote container.
-   *
-   * @param {string} message - Text to display
-   * @returns {void}
-   */
-  function _renderFallback(message) {
-    const container = document.getElementById('quote-container');
-    if (!container) return;
-
-    // Pick a random quote from the local pool
-    const fallback = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
-    _render(fallback);
-
-    if (message) {
-      console.info(`[Quotes] ${message} — showing fallback.`);
-    }
+  function _todayISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   /**
@@ -93,13 +58,92 @@ const Quotes = (() => {
   }
 
   // -------------------------------------------------------------------------
+  // DOM rendering
+  // -------------------------------------------------------------------------
+
+  /**
+   * Renders a quote into the #quote-container element.
+   *
+   * @param {{content: string, author: string}} quote
+   * @returns {void}
+   */
+  function _render(quote) {
+    const container = document.getElementById('quote-container');
+    if (!container) return;
+
+    container.innerHTML = `
+      <blockquote class="quote-block">
+        <p class="quote-block__text">${_escapeHtml(quote.content)}</p>
+        <footer class="quote-block__author">— ${_escapeHtml(quote.author)}</footer>
+      </blockquote>
+    `;
+  }
+
+  /**
+   * Renders a loading placeholder in the quote container.
+   *
+   * @returns {void}
+   */
+  function _renderLoading() {
+    const container = document.getElementById('quote-container');
+    if (!container) return;
+    container.innerHTML = `
+      <blockquote class="quote-block">
+        <p class="quote-block__loading" id="quote-text">Loading quote…</p>
+      </blockquote>
+    `;
+  }
+
+  // -------------------------------------------------------------------------
+  // Cache helpers
+  // -------------------------------------------------------------------------
+
+  /**
+   * Attempts to return a cached quote for today.
+   * Returns null if cache is empty or stale.
+   *
+   * @returns {{content: string, author: string}|null}
+   */
+  function _loadCache() {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (data.date === _todayISO() && data.content && data.author) {
+        return { content: data.content, author: data.author };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Saves a quote to the localStorage cache with today's date.
+   *
+   * @param {{content: string, author: string}} quote
+   * @returns {void}
+   */
+  function _saveCache(quote) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        date:    _todayISO(),
+        content: quote.content,
+        author:  quote.author,
+      }));
+    } catch (err) {
+      console.warn('[Quotes] Failed to cache quote:', err);
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // API fetch
   // -------------------------------------------------------------------------
 
   /**
    * Fetches a random quote from the Quotable API.
-   * Falls back to the local pool on any network or parse error.
    * Aborts after 5 seconds to avoid indefinite loading states.
+   * Falls back to FALLBACK_QUOTE on any network or parse error.
    *
    * @returns {Promise<void>}
    */
@@ -124,15 +168,14 @@ const Quotes = (() => {
         throw new Error('Unexpected API response shape');
       }
 
-      _render({ content: data.content, author: data.author });
+      const quote = { content: data.content, author: data.author };
+      _saveCache(quote);
+      _render(quote);
     } catch (err) {
       clearTimeout(timeoutId);
-
-      if (err.name === 'AbortError') {
-        _renderFallback('Request timed out');
-      } else {
-        _renderFallback(err.message);
-      }
+      const label = err.name === 'AbortError' ? 'Request timed out' : err.message;
+      console.info(`[Quotes] ${label} — showing fallback.`);
+      _render(FALLBACK_QUOTE);
     }
   }
 
@@ -141,11 +184,20 @@ const Quotes = (() => {
   // -------------------------------------------------------------------------
 
   /**
-   * Initialises the Quotes module. Fetches a quote immediately.
+   * Initialises the Quotes module.
+   * Uses today's cached quote if available; otherwise fetches a fresh one.
    *
    * @returns {void}
    */
   function init() {
+    _renderLoading();
+
+    const cached = _loadCache();
+    if (cached) {
+      _render(cached);
+      return;
+    }
+
     fetchQuote();
   }
 

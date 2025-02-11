@@ -1,7 +1,7 @@
 /**
  * @fileoverview Notes Module
  * Provides a freeform textarea that auto-saves content to localStorage.
- * Shows a transient "Saved" indicator after each successful save.
+ * Shows a transient "Saved" indicator and live word count on every keystroke.
  *
  * Storage key : 'pdb_notes'
  *
@@ -15,8 +15,8 @@ const Notes = (() => {
   // Constants
   // -------------------------------------------------------------------------
 
-  const STORAGE_KEY     = 'pdb_notes';
-  const AUTOSAVE_DELAY  = 600; // ms after last keystroke before saving
+  const STORAGE_KEY    = 'pdb_notes';
+  const AUTOSAVE_DELAY = 300; // ms after last keystroke before saving
 
   // -------------------------------------------------------------------------
   // State
@@ -30,6 +30,9 @@ const Notes = (() => {
 
   /** @type {HTMLElement|null} */
   let savedIndicator = null;
+
+  /** @type {HTMLElement|null} */
+  let wordCountEl = null;
 
   /** @type {number|null} Handle for hiding the saved indicator */
   let indicatorHandle = null;
@@ -49,6 +52,7 @@ const Notes = (() => {
       const content = localStorage.getItem(STORAGE_KEY);
       if (textarea && content !== null) {
         textarea.value = content;
+        _updateWordCount();
       }
     } catch (err) {
       console.warn('[Notes] Failed to load notes:', err);
@@ -76,7 +80,7 @@ const Notes = (() => {
   // -------------------------------------------------------------------------
 
   /**
-   * Briefly shows the "✓ Saved" indicator then fades it out.
+   * Briefly shows the "✓ Saved" indicator then fades it out after 1 second.
    *
    * @returns {void}
    */
@@ -93,7 +97,19 @@ const Notes = (() => {
     indicatorHandle = setTimeout(() => {
       savedIndicator.classList.remove('notes-saved-indicator--visible');
       indicatorHandle = null;
-    }, 1800);
+    }, 1000);
+  }
+
+  /**
+   * Counts words in the textarea and updates the word count element.
+   *
+   * @returns {void}
+   */
+  function _updateWordCount() {
+    if (!wordCountEl || !textarea) return;
+    const text  = textarea.value.trim();
+    const count = text.length === 0 ? 0 : text.split(/\s+/).length;
+    wordCountEl.textContent = `${count} word${count !== 1 ? 's' : ''}`;
   }
 
   // -------------------------------------------------------------------------
@@ -101,12 +117,13 @@ const Notes = (() => {
   // -------------------------------------------------------------------------
 
   /**
-   * Debounced input handler — waits AUTOSAVE_DELAY ms after the last keystroke
-   * before persisting, to avoid thrashing localStorage on every character.
+   * Input handler — updates word count immediately, debounces the save.
    *
    * @returns {void}
    */
   function _onInput() {
+    _updateWordCount();
+
     if (debounceHandle !== null) {
       clearTimeout(debounceHandle);
     }
@@ -129,6 +146,7 @@ const Notes = (() => {
   function init() {
     textarea       = document.getElementById('notes-area');
     savedIndicator = document.getElementById('notes-saved-indicator');
+    wordCountEl    = document.getElementById('notes-word-count');
 
     if (!textarea) {
       console.warn('[Notes] Textarea element not found.');
